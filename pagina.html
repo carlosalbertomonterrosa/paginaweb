@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENCA24 | Full Stack Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --or: #ff9500;
+  --cy: #00f2ff;
+  --pk: #e91e63;
+  --bg: #06060e;
+  --panel: #0d0d1a;
+  --card: #111122;
+  --border: rgba(255,149,0,0.15);
+  --border2: rgba(0,242,255,0.12);
+  --text: #f0f0f8;
+  --muted: #6b6b8a;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+#cursor { position: fixed; width: 8px; height: 8px; background: var(--or); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: transform 0.1s; mix-blend-mode: difference; }
+#cursor-ring { position: fixed; width: 32px; height: 32px; border: 1px solid rgba(255,149,0,0.4); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: all 0.15s ease; }
+
+/* Grid noise overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,149,0,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,149,0,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+  height: 64px;
+  background: rgba(6,6,14,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--or);
+  cursor: pointer;
+  letter-spacing: -1px;
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-dot { width: 8px; height: 8px; background: var(--or); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,149,0,0.6)} 50%{box-shadow:0 0 0 6px rgba(255,149,0,0)} }
+
+.nav-links { display: flex; gap: 2px; }
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.nav-links a:hover { color: var(--or); background: rgba(255,149,0,0.06); }
+.nav-links a.active { color: var(--or); background: rgba(255,149,0,0.1); }
+
+/* ── LAYOUT ── */
+.container { max-width: 1100px; margin: 0 auto; padding: 88px 24px 48px; position: relative; z-index: 1; }
+.section { display: none; animation: fadeUp 0.4s ease; }
+.section.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── HERO ── */
+.hero {
+  min-height: calc(100vh - 88px);
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative;
+}
+
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--cy);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-tag::before { content: ''; display: block; width: 32px; height: 1px; background: var(--cy); }
+
+.hero h1 {
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -3px;
+  margin-bottom: 32px;
+}
+.hero h1 .line { display: block; overflow: hidden; }
+.hero h1 .accent { color: var(--or); }
+.hero h1 .outline {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+  color: transparent;
+}
+
+.hero-sub {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 480px;
+  margin-bottom: 48px;
+}
+
+.hero-pills { display: flex; gap: 12px; flex-wrap: wrap; }
+.pill {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 8px 18px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.pill-or { background: var(--or); color: #000; }
+.pill-or:hover { background: #fff; }
+.pill-ghost { border: 1px solid var(--border); color: var(--muted); }
+.pill-ghost:hover { border-color: var(--or); color: var(--or); }
+
+.hero-stats {
+  position: absolute; bottom: 48px; right: 0;
+  display: flex; gap: 48px;
+}
+.stat { text-align: right; }
+.stat-num { font-size: 2.2rem; font-weight: 800; color: var(--or); letter-spacing: -2px; }
+.stat-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+
+/* ── DECORATIVE CORNER ── */
+.corner-deco {
+  position: absolute; top: 80px; right: 0;
+  width: 360px; height: 360px;
+  pointer-events: none;
+}
+.corner-deco svg { width: 100%; height: 100%; opacity: 0.18; }
+
+/* ── SECTION HEADER ── */
+.sec-header { margin-bottom: 40px; }
+.sec-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--cy);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sec-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--cy); }
+.sec-header h2 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; }
+
+/* ── CARDS ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+.member-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.member-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--or), transparent);
+}
+.member-card:hover { border-color: rgba(255,149,0,0.35); transform: translateY(-3px); }
+.member-card .role { font-family: var(--mono); font-size: 0.7rem; color: var(--or); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+.member-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+
+.director-card {
+  background: linear-gradient(135deg, #0d0d1a 0%, #111128 100%);
+  border: 1px solid rgba(0,242,255,0.2);
+  border-radius: 6px;
+  padding: 2rem;
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+.director-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--cy), transparent);
+}
+.director-card .title { font-family: var(--mono); font-size: 0.7rem; color: var(--cy); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+.director-card h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+.director-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; margin-top: 12px; }
+
+/* ── FEATURES ── */
+.feat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+.feat-card:hover { border-color: rgba(255,149,0,0.3); }
+.feat-icon { font-size: 1.6rem; margin-bottom: 12px; }
+.feat-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+.feat-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+/* ── TOOLS ── */
+.tools-wrap { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+@media(max-width:700px){ .tools-wrap { grid-template-columns: 1fr; } }
+
+/* Calculator */
+.calc-wrap {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+}
+.calc-body { flex: 1; padding: 20px; }
+.calc-screen {
+  width: 100%; height: 64px;
+  background: #000;
+  border: none; border-bottom: 1px solid #1a1a30;
+  color: var(--cy);
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  text-align: right;
+  padding: 0 12px;
+  margin-bottom: 16px;
+  outline: none;
+}
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cb {
+  padding: 14px;
+  background: #0d0d1a;
+  border: 1px solid #1a1a2e;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.cb:hover { background: #1a1a2e; }
+.cb.op { color: var(--or); }
+.cb.eq { background: var(--or); color: #000; font-weight: 700; }
+.cb.eq:hover { background: #fff; }
+.calc-hist {
+  width: 140px; background: #050508;
+  padding: 16px; border-left: 1px solid #1a1a2e;
+  font-family: var(--mono); font-size: 0.72rem; color: var(--muted);
+  overflow-y: auto; max-height: 320px;
+}
+.calc-hist-title { color: var(--or); margin-bottom: 12px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
+.hist-item { padding: 6px 0; border-bottom: 1px solid #111; }
+
+/* Info sidebar */
+.info-sidebar { display: flex; flex-direction: column; gap: 12px; }
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+}
+.info-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.info-val { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; color: var(--or); }
+
+/* ── GAMES ── */
+.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.game-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.game-btn:hover { border-color: rgba(255,149,0,0.4); transform: translateY(-4px); background: #161628; }
+.game-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.game-btn h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+.game-btn p { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+
+.game-view { display: none; }
+.game-view.active { display: block; }
+.back-btn {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.back-btn:hover { border-color: var(--or); color: var(--or); background: transparent; transform: none; }
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(255,149,0,0.1);
+}
+.game-label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); text-align: center; margin-top: 12px; }
+
+/* ── PQR / EMPLEO FORMS ── */
+.form-field { margin-bottom: 16px; }
+.form-field label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 6px; }
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  background: #000;
+  border: 1px solid #1a1a2e;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  padding: 12px 14px;
+  border-radius: 4px;
+  transition: 0.2s;
+  outline: none;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: var(--or); }
+.form-field textarea { height: 120px; resize: vertical; }
+.form-field select { appearance: none; }
+
+.submit-btn {
+  background: var(--or);
+  color: #000;
+  border: none;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 14px 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.submit-btn:hover { background: #fff; transform: none; }
+
+.success-toast {
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--panel);
+  border: 1px solid rgba(0,242,255,0.3);
+  border-radius: 6px;
+  padding: 16px 24px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--cy);
+  z-index: 9999;
+  display: none;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+footer {
+  text-align: center;
+  padding: 3rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="success-toast" class="success-toast"></div>
+
+<nav>
+  <div class="logo" onclick="show('inicio')">
+    <span class="logo-dot"></span>
+    ENCA24
+  </div>
+  <div class="nav-links">
+    <a onclick="show('inicio')" id="nav-inicio" class="active">Inicio</a>
+    <a onclick="show('equipo')" id="nav-equipo">Ingenieros</a>
+    <a onclick="show('herramientas')" id="nav-herramientas">Herramientas</a>
+    <a onclick="show('recreo')" id="nav-recreo">Recreo</a>
+    <a onclick="show('pqr')" id="nav-pqr">PQR</a>
+    <a onclick="show('empleo')" id="nav-empleo">Empleo</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- INICIO -->
+  <div id="inicio" class="section active">
+    <div class="hero">
+      <div class="corner-deco">
+        <svg viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="180" cy="180" r="160" stroke="#ff9500" stroke-width="0.5"/>
+          <circle cx="180" cy="180" r="120" stroke="#ff9500" stroke-width="0.5"/>
+          <circle cx="180" cy="180" r="80" stroke="#00f2ff" stroke-width="0.5"/>
+          <line x1="20" y1="180" x2="340" y2="180" stroke="#ff9500" stroke-width="0.5"/>
+          <line x1="180" y1="20" x2="180" y2="340" stroke="#ff9500" stroke-width="0.5"/>
+          <line x1="67" y1="67" x2="293" y2="293" stroke="#ff9500" stroke-width="0.3"/>
+          <line x1="293" y1="67" x2="67" y2="293" stroke="#ff9500" stroke-width="0.3"/>
+          <circle cx="180" cy="180" r="4" fill="#ff9500"/>
+          <circle cx="180" cy="20" r="3" fill="#00f2ff"/>
+          <circle cx="340" cy="180" r="3" fill="#00f2ff"/>
+        </svg>
+      </div>
+
+      <div class="hero-tag">Software & Innovación · Barranquilla</div>
+
+      <h1>
+        <span class="line">FULL</span>
+        <span class="line accent">STACK</span>
+        <span class="line outline">HUB</span>
+      </h1>
+
+      <p class="hero-sub">
+        Desarrollamos arquitecturas de alto rendimiento.<br>
+        Código limpio. Sistemas escalables. Seguridad bancaria.<br>
+        <span style="color:var(--or)">Barranquilla → Global.</span>
+      </p>
+
+      <div class="hero-pills">
+        <span class="pill pill-or" onclick="show('equipo')">Ver Equipo →</span>
+        <span class="pill pill-ghost" onclick="show('herramientas')">Herramientas</span>
+        <span class="pill pill-ghost" onclick="show('pqr')">Contacto</span>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">4</div><div class="stat-label">Ingenieros</div></div>
+        <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Escalabilidad</div></div>
+        <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Disponibilidad</div></div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:80px">
+      <div class="feat-card"><div class="feat-icon">⚡</div><h3>Rendimiento</h3><p>Código optimizado con métricas de alto rendimiento y arquitecturas sin cuellos de botella.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔐</div><h3>Seguridad</h3><p>Protocolos de cifrado de nivel bancario. Auditorías de vulnerabilidades incluidas.</p></div>
+      <div class="feat-card"><div class="feat-icon">🚀</div><h3>Escalabilidad</h3><p>Arquitecturas cloud-native preparadas para crecer de 10 a 10 millones de usuarios.</p></div>
+    </div>
+  </div>
+
+  <!-- EQUIPO -->
+  <div id="equipo" class="section">
+    <div class="sec-header">
+      <div class="sec-tag">Nuestro equipo</div>
+      <h2>Cuerpo de Ingeniería</h2>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="member-card">
+        <div class="role">Arquitecto de Software</div>
+        <h3>Carlos Alberto</h3>
+        <p style="color:var(--muted);font-size:0.85rem;margin-top:8px;line-height:1.6">Diseño de sistemas distribuidos y microservicios.</p>
+      </div>
+      <div class="member-card">
+        <div class="role">Ciberseguridad</div>
+        <h3>Francisco Javier</h3>
+        <p style="color:var(--muted);font-size:0.85rem;margin-top:8px;line-height:1.6">Pentesting, hardening y auditorías de seguridad.</p>
+      </div>
+      <div class="member-card">
+        <div class="role">Lead Frontend</div>
+        <h3>Juan Sebastián</h3>
+        <p style="color:var(--muted);font-size:0.85rem;margin-top:8px;line-height:1.6">React, performance y experiencias de usuario de élite.</p>
+      </div>
+    </div>
+
+    <div class="director-card">
+      <div class="title">Director & Mentor Senior</div>
+      <h2>Jorge Mario</h2>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:0.7rem;padding:4px 12px;background:rgba(0,242,255,0.08);border:1px solid rgba(0,242,255,0.2);border-radius:2px;color:var(--cy)">Telemática</span>
+        <span style="font-family:var(--mono);font-size:0.7rem;padding:4px 12px;background:rgba(0,242,255,0.08);border:1px solid rgba(0,242,255,0.2);border-radius:2px;color:var(--cy)">Aeroespacial</span>
+        <span style="font-family:var(--mono);font-size:0.7rem;padding:4px 12px;background:rgba(0,242,255,0.08);border:1px solid rgba(0,242,255,0.2);border-radius:2px;color:var(--cy)">Alta disponibilidad</span>
+      </div>
+      <p>Ingeniero en Telemática. Experto en protocolos aeroespaciales y sistemas de alta disponibilidad. Mentoring de equipos de alto rendimiento desde 2010.</p>
+    </div>
+  </div>
+
+  <!-- HERRAMIENTAS -->
+  <div id="herramientas" class="section">
+    <div class="sec-header">
+      <div class="sec-tag">Dev tools</div>
+      <h2>Herramientas de Ingeniería</h2>
+    </div>
+
+    <div class="tools-wrap">
+      <div class="calc-wrap">
+        <div class="calc-body">
+          <input type="text" id="calc-display" class="calc-screen" readonly value="0">
+          <div class="calc-grid">
+            <button class="cb" onclick="cc()">C</button>
+            <button class="cb op" onclick="cp('(')">(</button>
+            <button class="cb op" onclick="cp(')')">)</button>
+            <button class="cb op" onclick="cd()">⌫</button>
+            <button class="cb" onclick="cp('7')">7</button>
+            <button class="cb" onclick="cp('8')">8</button>
+            <button class="cb" onclick="cp('9')">9</button>
+            <button class="cb op" onclick="cp('/')">÷</button>
+            <button class="cb" onclick="cp('4')">4</button>
+            <button class="cb" onclick="cp('5')">5</button>
+            <button class="cb" onclick="cp('6')">6</button>
+            <button class="cb op" onclick="cp('*')">×</button>
+            <button class="cb" onclick="cp('1')">1</button>
+            <button class="cb" onclick="cp('2')">2</button>
+            <button class="cb" onclick="cp('3')">3</button>
+            <button class="cb op" onclick="cp('-')">−</button>
+            <button class="cb" style="grid-column:span 2" onclick="cp('0')">0</button>
+            <button class="cb" onclick="cp('.')">.</button>
+            <button class="cb op" onclick="cp('+')">+</button>
+            <button class="cb eq" style="grid-column:span 4;margin-top:4px" onclick="cs()">=</button>
+          </div>
+        </div>
+        <div class="calc-hist" id="calc-hist">
+          <div class="calc-hist-title">Historial</div>
+        </div>
+      </div>
+
+      <div class="info-sidebar">
+        <div class="info-card">
+          <div class="info-label">Dólar · TRM</div>
+          <div class="info-val" id="trm-val">$3,942.50</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Hora Barranquilla</div>
+          <div class="info-val" id="hora-baq" style="color:var(--cy)">00:00:00</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Temperatura BAQ</div>
+          <div class="info-val">31°C</div>
+          <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-top:4px">Nublado · Caribe</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Estado del sistema</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <span style="width:8px;height:8px;background:#00e676;border-radius:50%;display:inline-block;box-shadow:0 0 6px #00e676"></span>
+            <span style="font-family:var(--mono);font-size:0.8rem;color:#00e676">Todos los sistemas OK</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECREO -->
+  <div id="recreo" class="section">
+    <div id="recreo-menu">
+      <div class="sec-header">
+        <div class="sec-tag">Zona de recreo</div>
+        <h2>Arcade</h2>
+      </div>
+      <div class="game-grid">
+        <div class="game-btn" onclick="openGame('snake')">
+          <div class="game-icon">🐍</div>
+          <h3>Snake Pro</h3>
+          <p>Clásico retro</p>
+        </div>
+        <div class="game-btn" onclick="openGame('pacman')">
+          <div class="game-icon">🟡</div>
+          <h3>Pac-Man</h3>
+          <p>Elite Edition</p>
+        </div>
+        <div class="game-btn" onclick="openGame('tetris')">
+          <div class="game-icon">🧱</div>
+          <h3>Tetris</h3>
+          <p>Master Level</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-snake" class="game-view">
+      <button class="back-btn" onclick="closeGames()">← Volver</button>
+      <div style="text-align:center">
+        <canvas id="snakeCanvas" width="360" height="360"></canvas>
+        <div class="game-label">Flechas del teclado · Score: <span id="snake-score">0</span></div>
+      </div>
+    </div>
+
+    <div id="game-pacman" class="game-view">
+      <button class="back-btn" onclick="closeGames()">← Volver</button>
+      <div style="text-align:center">
+        <canvas id="pacmanCanvas" width="360" height="360"></canvas>
+        <div class="game-label">WASD para mover</div>
+      </div>
+    </div>
+
+    <div id="game-tetris" class="game-view">
+      <button class="back-btn" onclick="closeGames()">← Volver</button>
+      <div style="text-align:center">
+        <canvas id="tetrisCanvas" width="240" height="480"></canvas>
+        <div class="game-label">Flechas: Mover · Arriba: Rotar · Score: <span id="tetris-score">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PQR -->
+  <div id="pqr" class="section">
+    <div class="sec-header">
+      <div class="sec-tag">Contacto</div>
+      <h2>Sistema PQR</h2>
+    </div>
+    <div class="panel" style="max-width:600px">
+      <div class="form-field">
+        <label>Nombre completo</label>
+        <input type="text" id="pqr-nombre" placeholder="Tu nombre">
+      </div>
+      <div class="form-field">
+        <label>Tipo de solicitud</label>
+        <select id="pqr-tipo">
+          <option>Petición</option>
+          <option>Queja</option>
+          <option>Reclamo</option>
+          <option>Sugerencia</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Descripción</label>
+        <textarea id="pqr-desc" placeholder="Cuéntanos los detalles..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitPQR()">Enviar solicitud</button>
+    </div>
+  </div>
+
+  <!-- EMPLEO -->
+  <div id="empleo" class="section">
+    <div class="sec-header">
+      <div class="sec-tag">Únete al equipo</div>
+      <h2>Trabaja con Nosotros</h2>
+    </div>
+    <div class="panel" style="max-width:600px">
+      <div class="form-field">
+        <label>GitHub / Portafolio</label>
+        <input type="text" id="emp-portfolio" placeholder="https://github.com/tuusuario">
+      </div>
+      <div class="form-field">
+        <label>Posición de interés</label>
+        <select id="emp-rol">
+          <option>Senior React Developer</option>
+          <option>Cloud Architect</option>
+          <option>DevOps Engineer</option>
+          <option>Full Stack Developer</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Mensaje para Jorge Mario</label>
+        <textarea id="emp-msg" placeholder="¿Por qué quieres unirte a ENCA24?"></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitEmpleo()">Postularme</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 ENCA24 · Ingeniería de Élite · Barranquilla, Colombia 🇨🇴</p>
+</footer>
+
+<script>
+// ── CURSOR ──
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top = e.clientY + 'px';
+  ring.style.left = e.clientX + 'px';
+  ring.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a,button,.pill,.game-btn,.member-card,.feat-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.style.transform = 'translate(-50%,-50%) scale(1.8)'; ring.style.borderColor = 'rgba(255,149,0,0.7)'; });
+  el.addEventListener('mouseleave', () => { ring.style.transform = 'translate(-50%,-50%) scale(1)'; ring.style.borderColor = 'rgba(255,149,0,0.4)'; });
+});
+
+// ── NAVIGATION ──
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const nav = document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+  if(id !== 'recreo') closeGames();
+  window.scrollTo(0,0);
+}
+
+// ── CALCULATOR ──
+let disp = document.getElementById('calc-display');
+let hist = document.getElementById('calc-hist');
+
+function cp(v) {
+  if(disp.value === '0' && v !== '.') disp.value = v;
+  else disp.value += v;
+}
+function cc() { disp.value = '0'; }
+function cd() { disp.value = disp.value.slice(0,-1) || '0'; }
+function cs() {
+  try {
+    let expr = disp.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+    let res = Function('"use strict";return (' + expr + ')')();
+    res = Math.round(res * 1e10) / 1e10;
+    let item = document.createElement('div');
+    item.className = 'hist-item';
+    item.textContent = expr + ' = ' + res;
+    hist.appendChild(item);
+    hist.scrollTop = hist.scrollHeight;
+    disp.value = res;
+  } catch { disp.value = 'Error'; }
+}
+document.addEventListener('keydown', e => {
+  const section = document.getElementById('herramientas');
+  if(!section.classList.contains('active')) return;
+  if(e.key >= '0' && e.key <= '9') cp(e.key);
+  else if(['+','-','*','/','(',')'].includes(e.key)) cp(e.key);
+  else if(e.key === '.') cp('.');
+  else if(e.key === 'Enter') cs();
+  else if(e.key === 'Backspace') cd();
+  else if(e.key === 'Escape') cc();
+});
+
+// ── CLOCK ──
+setInterval(() => {
+  document.getElementById('hora-baq').textContent = new Date().toLocaleTimeString('es-CO');
+}, 1000);
+
+// ── TOAST ──
+function toast(msg) {
+  const t = document.getElementById('success-toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function submitPQR() {
+  const n = document.getElementById('pqr-nombre').value.trim();
+  if(!n) { alert('Por favor ingresa tu nombre.'); return; }
+  toast('✓ Solicitud radicada con éxito');
+  document.getElementById('pqr-nombre').value = '';
+  document.getElementById('pqr-desc').value = '';
+}
+function submitEmpleo() {
+  toast('✓ Postulación enviada a Jorge Mario');
+  document.getElementById('emp-portfolio').value = '';
+  document.getElementById('emp-msg').value = '';
+}
+
+// ── GAMES ──
+function openGame(g) {
+  document.getElementById('recreo-menu').style.display = 'none';
+  document.querySelectorAll('.game-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('game-'+g).classList.add('active');
+  if(g==='snake') initSnake();
+  if(g==='tetris') initTetris();
+  if(g==='pacman') initPacman();
+}
+function closeGames() {
+  const menu = document.getElementById('recreo-menu');
+  if(menu) menu.style.display = 'block';
+  document.querySelectorAll('.game-view').forEach(v => v.classList.remove('active'));
+  snakeRunning = false;
+  tetrisRunning = false;
+}
+
+// ──── SNAKE ────
+let snakeRunning = false;
+function initSnake() {
+  const c = document.getElementById('snakeCanvas');
+  const ctx = c.getContext('2d');
+  const SZ = 18, COLS = 20, ROWS = 20;
+  let snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  let dir = {x:1,y:0}, nextDir = {x:1,y:0};
+  let food = {x:15,y:15}, score = 0;
+  snakeRunning = true;
+
+  function rndFood() {
+    food = {x:Math.floor(Math.random()*COLS), y:Math.floor(Math.random()*ROWS)};
+  }
+  function draw() {
+    if(!snakeRunning) return;
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,360,360);
+    // grid dots
+    ctx.fillStyle = '#0d0d1a';
+    for(let x=0;x<COLS;x++) for(let y=0;y<ROWS;y++) ctx.fillRect(x*SZ+8,y*SZ+8,2,2);
+    // food
+    ctx.fillStyle = '#e91e63';
+    ctx.beginPath(); ctx.arc(food.x*SZ+SZ/2, food.y*SZ+SZ/2, SZ/2-2, 0, Math.PI*2); ctx.fill();
+    // snake
+    snake.forEach((seg,i) => {
+      ctx.fillStyle = i===0 ? '#ff9500' : `rgba(255,149,0,${0.8-i*0.03})`;
+      ctx.beginPath();
+      ctx.roundRect(seg.x*SZ+1, seg.y*SZ+1, SZ-2, SZ-2, 3);
+      ctx.fill();
+    });
+    // move
+    dir = nextDir;
+    let head = {x: snake[0].x+dir.x, y: snake[0].y+dir.y};
+    if(head.x<0) head.x=COLS-1; if(head.x>=COLS) head.x=0;
+    if(head.y<0) head.y=ROWS-1; if(head.y>=ROWS) head.y=0;
+    if(snake.some(s=>s.x===head.x&&s.y===head.y)) { snakeRunning=false; ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,360,360); ctx.fillStyle='#ff9500'; ctx.font='bold 28px Syne'; ctx.textAlign='center'; ctx.fillText('Game Over',180,160); ctx.font='16px Space Mono'; ctx.fillStyle='#888'; ctx.fillText('Score: '+score,180,195); ctx.fillText('Click para reiniciar',180,225); return; }
+    snake.unshift(head);
+    if(head.x===food.x&&head.y===food.y){ score++; document.getElementById('snake-score').textContent=score; rndFood(); } else snake.pop();
+    setTimeout(draw, 120);
+  }
+  c.onclick = ()=>{ if(!snakeRunning){ snakeRunning=true; snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}]; dir={x:1,y:0}; nextDir={x:1,y:0}; score=0; document.getElementById('snake-score').textContent=0; rndFood(); draw(); } };
+  document.addEventListener('keydown', e => {
+    if(e.key==='ArrowUp'&&dir.y!==1) nextDir={x:0,y:-1};
+    if(e.key==='ArrowDown'&&dir.y!==-1) nextDir={x:0,y:1};
+    if(e.key==='ArrowLeft'&&dir.x!==1) nextDir={x:-1,y:0};
+    if(e.key==='ArrowRight'&&dir.x!==-1) nextDir={x:1,y:0};
+  });
+  draw();
+}
+
+// ──── TETRIS ────
+let tetrisRunning = false;
+function initTetris() {
+  const c = document.getElementById('tetrisCanvas');
+  const ctx = c.getContext('2d');
+  const W=12, H=24, SZ=20;
+  const PIECES = [
+    {shape:[[1,1,1,1]],color:'#00f2ff'},
+    {shape:[[1,1],[1,1]],color:'#ff9500'},
+    {shape:[[0,1,0],[1,1,1]],color:'#e91e63'},
+    {shape:[[1,0,0],[1,1,1]],color:'#9c27b0'},
+    {shape:[[0,0,1],[1,1,1]],color:'#ff5722'},
+    {shape:[[1,1,0],[0,1,1]],color:'#4caf50'},
+    {shape:[[0,1,1],[1,1,0]],color:'#f44336'},
+  ];
+  let board = Array.from({length:H},()=>Array(W).fill(0));
+  let cur, curX, curY, tScore=0;
+  tetrisRunning = true;
+
+  function newPiece() {
+    const p = PIECES[Math.floor(Math.random()*PIECES.length)];
+    cur = {shape:p.shape.map(r=>[...r]),color:p.color};
+    curX = Math.floor(W/2)-Math.floor(cur.shape[0].length/2);
+    curY = 0;
+    if(collide()) { tetrisRunning=false; }
+  }
+  function collide(dx=0,dy=0,s=cur.shape) {
+    for(let r=0;r<s.length;r++) for(let c=0;c<s[r].length;c++) {
+      if(!s[r][c]) continue;
+      let nx=curX+c+dx, ny=curY+r+dy;
+      if(nx<0||nx>=W||ny>=H) return true;
+      if(ny>=0&&board[ny][nx]) return true;
+    }
+    return false;
+  }
+  function merge() {
+    cur.shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v&&curY+ri>=0) board[curY+ri][curX+ci]=cur.color; }));
+    let cleared=0;
+    board = board.filter(r=>{ if(r.every(c=>c)){ cleared++; return false; } return true; });
+    while(board.length<H) board.unshift(Array(W).fill(0));
+    tScore+=cleared*100; document.getElementById('tetris-score').textContent=tScore;
+    newPiece();
+  }
+  function rotate() {
+    const r = cur.shape[0].map((_,i)=>cur.shape.map(r=>r[i]).reverse());
+    if(!collide(0,0,r)) cur.shape=r;
+  }
+  function draw() {
+    if(!tetrisRunning) return;
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,240,480);
+    board.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v){ ctx.fillStyle=v; ctx.beginPath(); ctx.roundRect(ci*SZ+1,ri*SZ+1,SZ-2,SZ-2,2); ctx.fill(); } }));
+    cur.shape.forEach((r,ri)=>r.forEach((v,ci)=>{ if(v){ ctx.fillStyle=cur.color; ctx.beginPath(); ctx.roundRect((curX+ci)*SZ+1,(curY+ri)*SZ+1,SZ-2,SZ-2,2); ctx.fill(); } }));
+    if(!collide(0,1)) { curY++; } else { merge(); }
+    setTimeout(draw, 400);
+  }
+  document.addEventListener('keydown', e=>{
+    if(!tetrisRunning) return;
+    if(e.key==='ArrowLeft') { if(!collide(-1,0)) curX--; }
+    if(e.key==='ArrowRight') { if(!collide(1,0)) curX++; }
+    if(e.key==='ArrowDown') { if(!collide(0,1)) curY++; }
+    if(e.key==='ArrowUp') rotate();
+  });
+  newPiece(); draw();
+}
+
+// ──── PAC-MAN (simple) ────
+function initPacman() {
+  const c = document.getElementById('pacmanCanvas');
+  const ctx = c.getContext('2d');
+  let pac = {x:180, y:180, dir:{x:0,y:0}, mouth:0, mDir:1};
+  let dots = [];
+  for(let x=20;x<360;x+=20) for(let y=20;y<360;y+=20) dots.push({x,y,eaten:false});
+  let pscore=0;
+
+  function draw() {
+    if(!document.getElementById('game-pacman').classList.contains('active')) return;
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,360,360);
+    // dots
+    dots.forEach(d=>{ if(!d.eaten){ ctx.fillStyle='rgba(255,149,0,0.5)'; ctx.beginPath(); ctx.arc(d.x,d.y,3,0,Math.PI*2); ctx.fill(); } });
+    // pacman
+    pac.mouth += 0.15*pac.mDir;
+    if(pac.mouth>0.25||pac.mouth<0) pac.mDir*=-1;
+    const angle = Math.atan2(pac.dir.y, pac.dir.x);
+    ctx.fillStyle='#ff9500';
+    ctx.beginPath();
+    ctx.moveTo(pac.x,pac.y);
+    ctx.arc(pac.x,pac.y,14, angle+pac.mouth, angle+Math.PI*2-pac.mouth);
+    ctx.closePath(); ctx.fill();
+    // move
+    pac.x += pac.dir.x*2.5; pac.y += pac.dir.y*2.5;
+    pac.x = Math.max(14,Math.min(346,pac.x)); pac.y = Math.max(14,Math.min(346,pac.y));
+    // eat
+    dots.forEach(d=>{ if(!d.eaten&&Math.hypot(d.x-pac.x,d.y-pac.y)<12) d.eaten=true; });
+    if(dots.every(d=>d.eaten)){ dots.forEach(d=>d.eaten=false); }
+    requestAnimationFrame(draw);
+  }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='w'||e.key==='W') pac.dir={x:0,y:-1};
+    if(e.key==='s'||e.key==='S') pac.dir={x:0,y:1};
+    if(e.key==='a'||e.key==='A') pac.dir={x:-1,y:0};
+    if(e.key==='d'||e.key==='D') pac.dir={x:1,y:0};
+  });
+  draw();
+}
+</script>
+</body>
+</html> 
